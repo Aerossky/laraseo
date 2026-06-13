@@ -1,58 +1,198 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# laraseo
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> A Laravel 13 starter kit with SEO built-in from day one.
 
-## About Laravel
+Most Laravel developers skip SEO because setting it up from scratch is tedious. WordPress developers rely on Rank Math. **laraseo** fills that gap — clone it, customize it, ship it.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## What's included
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Blog system** — posts, categories, draft/publish/schedule
+- **SEO per post** — meta title, meta description, Open Graph, canonical, robots, schema markup (JSON-LD)
+- **Sitemap** — auto-generated, auto-updated on publish/unpublish
+- **Redirect manager** — 301 and 302 redirects managed from admin, no code change needed
+- **Media library** — upload once, reuse anywhere, alt text stored per file
+- **Block editor** — EditorJS with paragraph, heading, image, gallery, quote, list, code, TOC blocks
+- **Table of Contents** — place freely inside content, auto-generated from headings
+- **Admin panel** — simple Blade + Tailwind, no Filament, no heavy dependencies
+- **Global SEO settings** — site name, default meta format, Google verification tag, head/body scripts, robots.txt editor
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Stack
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Layer | Technology |
+|---|---|
+| Backend | Laravel 13, PHP 8.3+ |
+| Frontend | Blade, Tailwind CSS v4, Alpine.js |
+| Auth | Laravel Breeze (Blade stack) |
+| Editor | EditorJS |
+| Database | MySQL 8+ (SQLite for local dev) |
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## Requirements
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+- PHP 8.3+
+- Composer
+- Node.js 18+
+- MySQL 8+ or SQLite
+
+---
+
+## Quick start
 
 ```bash
-composer require laravel/boost --dev
+# 1. Clone the repo
+git clone https://github.com/yourusername/laravel-seo-starter.git my-project
+cd my-project
 
-php artisan boost:install
+# 2. Install PHP dependencies
+composer install
+
+# 3. Install JS dependencies
+npm install
+
+# 4. Setup environment
+cp .env.example .env
+php artisan key:generate
+
+# 5. Configure your database in .env, then run migrations
+php artisan migrate
+
+# 6. Seed the database (creates default admin account)
+php artisan db:seed
+
+# 7. Build assets
+npm run build
+
+# 8. Start local server
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Admin panel available at `/admin`. Default credentials are in `DatabaseSeeder.php` — change them before deploying to production.
+
+---
+
+## Features in detail
+
+### SEO — enforced at system level
+
+SEO is not an afterthought here. It is built into the system:
+
+- H1 is always locked to the post title — one H1 per page, always
+- Meta title capped at 60 characters with a live counter in admin
+- Meta description capped at 160 characters with a live counter in admin
+- Canonical URL auto-set to current URL unless manually overridden
+- Schema markup (`Article`, `BreadcrumbList`) auto-generated per content type
+- All images require alt text before a post can be published
+- Sitemap updates automatically — no manual trigger needed
+- `<x-seo-head />` component handles all head tags in one line
+
+To use SEO in a new model:
+
+```php
+use App\Seo\HasSeoMeta;
+
+class Product extends Model
+{
+    use HasSeoMeta;
+}
+```
+
+```php
+// In your controller
+public function show(Product $product)
+{
+    seo()->for($product);
+    return view('products.show', compact('product'));
+}
+```
+
+### Block editor (EditorJS)
+
+Content is built with blocks — no raw HTML needed:
+
+- Type `/` to open block picker
+- Drag blocks to reorder
+- Insert images directly from media library
+- Available blocks: paragraph, heading (H2/H3), image, gallery, quote, list, code, table of contents
+
+### Table of Contents
+
+Add a TOC block anywhere inside the post content. It auto-generates from all H2 and H3 headings in the post with smooth scroll anchors.
+
+### Redirect manager
+
+Add and manage redirects from `/admin/redirects` — no code changes, no deployment needed. Middleware handles it automatically on every request.
+
+### Media library
+
+Powered by `spatie/laravel-medialibrary`. Upload images once, insert them anywhere across posts. Alt text is stored per file and auto-filled when inserting into content.
+
+---
+
+## Google Search Console setup
+
+1. Go to **Admin → SEO Settings**
+2. Paste your Google Site Verification meta tag
+3. Submit `https://yourdomain.com/sitemap.xml` to GSC
+
+That's it — sitemap stays up to date automatically.
+
+For Google Analytics, Clarity, or any other tracking script: paste the code in **Admin → SEO Settings → Head Scripts**.
+
+---
+
+## Customization
+
+This is a starting point, not a finished product. Everything is meant to be customized:
+
+- Edit Blade templates in `resources/views/`
+- Override styles in `resources/css/`
+- Add new models with `HasSeoMeta` trait
+- Extend EditorJS with additional blocks via npm
+
+The frontend is intentionally minimal — add your own design on top.
+
+---
+
+## What this is not
+
+- Not a SaaS product
+- Not a page builder
+- Not a multi-tenant CMS
+- Not a drop-in replacement for WordPress
+
+If you need a full CMS out of the box, consider October CMS or Statamic. laraseo is for Laravel developers who want to own their stack.
+
+---
+
+## Roadmap
+
+**v1 (current)**
+- Blog, categories, SEO fields, sitemap, redirects, media library, EditorJS, admin panel
+
+**v2 (planned)**
+- Static pages (About, Contact)
+- User roles and permissions
+- Tag pages
+- Comments system
+- Newsletter integration
+
+---
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for coding conventions and contribution guidelines.
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT — free to use for personal and commercial projects.
+
+---
+
+Built by [Aero](https://github.com/Aerossky)

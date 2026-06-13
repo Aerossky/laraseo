@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Seo\HasSeoMeta;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,9 +13,7 @@ use Spatie\Sluggable\SlugOptions;
 class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
-    use HasFactory, HasSlug;
-
-    // HasSeoMeta trait is added in Phase 3 (SEO layer) — see docs/TODO.md.
+    use HasFactory, HasSeoMeta, HasSlug;
 
     protected $fillable = [
         'name',
@@ -33,5 +32,15 @@ class Category extends Model
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
+    }
+
+    public function getSeoTitle(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getSeoDescription(): ?string
+    {
+        return $this->description;
     }
 }

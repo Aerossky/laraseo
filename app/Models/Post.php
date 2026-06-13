@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PostStatus;
+use App\Seo\HasSeoMeta;
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,9 +18,7 @@ use Spatie\Sluggable\SlugOptions;
 class Post extends Model implements HasMedia
 {
     /** @use HasFactory<PostFactory> */
-    use HasFactory, HasSlug, InteractsWithMedia, SoftDeletes;
-
-    // HasSeoMeta trait is added in Phase 3 (SEO layer) — see docs/TODO.md.
+    use HasFactory, HasSeoMeta, HasSlug, InteractsWithMedia, SoftDeletes;
 
     protected $fillable = [
         'category_id',
@@ -60,6 +59,23 @@ class Post extends Model implements HasMedia
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function getSeoTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function getSeoDescription(): ?string
+    {
+        return $this->excerpt;
+    }
+
+    public function getSeoImageUrl(): ?string
+    {
+        $url = $this->getFirstMediaUrl('featured');
+
+        return $url !== '' ? $url : null;
     }
 
     public function isPublished(): bool

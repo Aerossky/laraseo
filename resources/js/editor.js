@@ -72,8 +72,12 @@ export function createEditor({ holder, data = {}, onChange = null } = {}) {
 
 // Auto-init: any [data-editor] element becomes an editor and syncs its JSON
 // into the hidden input named by [data-editor-input].
-document.addEventListener('DOMContentLoaded', () => {
+function bootEditors() {
     document.querySelectorAll('[data-editor]').forEach((el) => {
+        if (el.__editor) {
+            return;
+        }
+
         const input = el.dataset.editorInput
             ? document.querySelector(el.dataset.editorInput)
             : null;
@@ -97,4 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 : null,
         });
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootEditors);
+} else {
+    bootEditors();
+}

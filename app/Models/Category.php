@@ -25,7 +25,9 @@ class Category extends Model
     {
         return SlugOptions::create()
             ->generateSlugsFrom('name')
-            ->saveSlugsTo('slug');
+            ->saveSlugsTo('slug')
+            ->preventOverwrite()          // allow a manually edited slug (FR-18)
+            ->doNotGenerateSlugsOnUpdate(); // keep permalinks stable when the name changes
     }
 
     /** @return HasMany<Post, $this> */

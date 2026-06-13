@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+class SeoMeta extends Model
+{
+    protected $fillable = [
+        'meta_title',
+        'meta_description',
+        'canonical_url',
+        'robots',
+        'og_title',
+        'og_description',
+        'og_image',
+    ];
+
+    /** @return MorphTo<Model, $this> */
+    public function seoable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+}

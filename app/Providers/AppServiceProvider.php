@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Seo\SeoService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +12,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Shared per-request SEO state, resolved via the seo() helper.
+        $this->app->singleton(SeoService::class);
     }
 
     /**

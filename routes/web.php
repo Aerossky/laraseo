@@ -12,14 +12,12 @@ use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// The blog index is the site's home page.
+Route::get('/', [BlogController::class, 'index'])->name('blog.index');
 
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('robots.txt', RobotsController::class)->name('robots');
 
-Route::get('blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('blog/category/{category:slug}', [BlogController::class, 'category'])->name('blog.category');
 Route::get('blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
 

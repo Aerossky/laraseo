@@ -7,11 +7,14 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\RedirectController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 
 // The admin panel is the home for authenticated users. Keep the "dashboard"
 // name so Breeze's post-auth redirects land on /admin.

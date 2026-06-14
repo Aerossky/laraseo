@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\PostStatus;
+use App\Observers\PostObserver;
 use App\Seo\HasSeoMeta;
 use Database\Factories\PostFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +17,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
+#[ObservedBy([PostObserver::class])]
 class Post extends Model implements HasMedia
 {
     /** @use HasFactory<PostFactory> */

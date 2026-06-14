@@ -70,7 +70,14 @@ npm run build
 php artisan serve
 ```
 
-Admin panel available at `/admin`. The seeder creates a default account — **`admin@example.com` / `password`** — change these credentials in `DatabaseSeeder.php` before deploying to production. The sample post is visible at `/blog`.
+Admin panel available at `/admin`. The seeder creates a default account — **`admin@example.com` / `password`** — change these credentials in `DatabaseSeeder.php` before deploying to production. The blog is the site home page at `/`.
+
+---
+
+## Documentation
+
+- **[Usage Guide](USAGE.md)** — run, manage content, and extend the starter (add admin pages, public pages, new SEO-aware models).
+- **[SEO Guide](SEO.md)** — what's automatic, what you configure, per-post and go-live checklists.
 
 ---
 

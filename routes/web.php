@@ -10,9 +10,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// The admin panel is the home for authenticated users. Keep the "dashboard"
+// name so Breeze's post-auth redirects land on /admin.
+Route::redirect('/dashboard', '/admin')->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

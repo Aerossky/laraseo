@@ -75,7 +75,9 @@ class SeoService
         $siteName = Setting::get('site_name', config('app.name'));
 
         $title = $this->value('meta_title', $meta?->meta_title) ?? $this->fromSubject('getSeoTitle');
-        $description = $this->value('meta_description', $meta?->meta_description) ?? $this->fromSubject('getSeoDescription');
+        $description = $this->value('meta_description', $meta?->meta_description)
+            ?? $this->fromSubject('getSeoDescription')
+            ?? (Setting::get('meta_description_fallback') ?: null);
         $canonical = $this->value('canonical_url', $meta?->canonical_url) ?? url()->current();
         $robots = $this->value('robots', $meta?->robots) ?? 'index, follow';
 
@@ -166,7 +168,13 @@ class SeoService
         }
 
         if ($format = Setting::get('meta_title_format')) {
-            return strtr($format, [':title' => $title, ':site' => (string) $siteName]);
+            // Support both {title}/{site} and :title/:site placeholder styles.
+            return strtr($format, [
+                '{title}' => $title,
+                '{site}' => (string) $siteName,
+                ':title' => $title,
+                ':site' => (string) $siteName,
+            ]);
         }
 
         return $siteName ? "{$title} — {$siteName}" : $title;

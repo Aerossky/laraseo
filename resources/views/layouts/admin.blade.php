@@ -28,6 +28,7 @@
                                     'admin.categories.index' => 'Categories',
                                     'admin.media.index' => 'Media',
                                     'admin.redirects.index' => 'Redirects',
+                                    'admin.settings.index' => 'Settings',
                                 ];
                             @endphp
                             @foreach ($nav as $route => $label)

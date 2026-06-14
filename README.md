@@ -47,28 +47,36 @@ Most Laravel developers skip SEO because setting it up from scratch is tedious. 
 git clone https://github.com/yourusername/laravel-seo-starter.git my-project
 cd my-project
 
-# 2. Install PHP dependencies
-composer install
-
-# 3. Install JS dependencies
-npm install
-
-# 4. Setup environment
+# 2. Create your environment file and configure the database
 cp .env.example .env
-php artisan key:generate
+# Edit .env: set DB_DATABASE / DB_USERNAME / DB_PASSWORD (and create the database)
 
-# 5. Configure your database in .env, then run migrations
-php artisan migrate
+# 3. Install, migrate, seed, link storage, and build — in one command
+composer run setup
 
-# 6. Seed the database (admin account + a sample post, category, redirect & settings)
-php artisan db:seed
-
-# 7. Build assets
-npm run build
-
-# 8. Start local server
+# 4. Start the local server
 php artisan serve
 ```
+
+> `composer run setup` runs: `composer install` → `key:generate` → `migrate` →
+> `db:seed` → `storage:link` → `npm install` → `npm run build`. It expects your
+> database to be reachable (step 2), so the migration can run.
+
+<details>
+<summary>Prefer to run each step manually?</summary>
+
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate           # configure your database in .env first
+php artisan db:seed           # admin account + sample post, category, redirect & settings
+php artisan storage:link      # required, or uploaded media will not display
+npm run build
+php artisan serve
+```
+</details>
 
 Admin panel available at `/admin`. The seeder creates a default account — **`admin@example.com` / `password`** — change these credentials in `DatabaseSeeder.php` before deploying to production. The blog is the site home page at `/`.
 
@@ -166,6 +174,35 @@ This is a starting point, not a finished product. Everything is meant to be cust
 - Extend EditorJS with additional blocks via npm
 
 The frontend is intentionally minimal — add your own design on top.
+
+---
+
+## Troubleshooting
+
+**Uploaded images / featured images don't show up**
+- Run `php artisan storage:link` (the one-time symlink for the `public` disk).
+- Make sure `APP_URL` matches the URL *and port* you actually browse on. Media,
+  canonical, and Open Graph URLs are absolute and built from `APP_URL` — if you serve
+  on `http://localhost:8001` but `APP_URL=http://localhost:8000`, images 404.
+  After changing it, run `php artisan config:clear`.
+
+**My frontend / Blade change isn't visible**
+- Rebuild assets: `npm run build` (or run `npm run dev` / `composer run dev` while developing).
+
+**`Unable to locate file in Vite manifest`**
+- You haven't built the assets yet. Run `npm run build`.
+
+**I don't see the meta title / SEO tags on the page**
+- They live in the `<head>`, not in the visible page. Open the browser tab title or
+  *View Source* / DevTools → `<head>`. See the [SEO Guide](SEO.md).
+
+**`composer run setup` fails on migration**
+- The database in `.env` isn't reachable yet. Create it and set
+  `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD`, then re-run.
+
+**Still logging in with `admin@example.com` / `password`**
+- That's the seeded default — change it in `database/seeders/DatabaseSeeder.php` (or
+  create a real account) before deploying. See the go-live checklist in the [SEO Guide](SEO.md#go-live-checklist).
 
 ---
 

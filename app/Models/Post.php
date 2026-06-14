@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Sluggable\HasSlug;
@@ -73,7 +74,22 @@ class Post extends Model implements HasMedia
 
     public function getSeoDescription(): ?string
     {
-        return $this->excerpt;
+        return $this->getExcerpt() ?: null;
+    }
+
+    /**
+     * The manual excerpt, or an auto-excerpt derived from the first paragraph.
+     */
+    public function getExcerpt(int $length = 160): string
+    {
+        if ($this->excerpt) {
+            return $this->excerpt;
+        }
+
+        $text = collect($this->content['blocks'] ?? [])
+            ->firstWhere('type', 'paragraph')['data']['text'] ?? '';
+
+        return Str::limit(trim(strip_tags($text)), $length);
     }
 
     public function getSeoImageUrl(): ?string

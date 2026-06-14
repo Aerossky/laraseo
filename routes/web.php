@@ -6,7 +6,9 @@ use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\RedirectController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +17,11 @@ Route::get('/', function () {
 });
 
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('robots.txt', RobotsController::class)->name('robots');
+
+Route::get('blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('blog/category/{category:slug}', [BlogController::class, 'category'])->name('blog.category');
+Route::get('blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
 
 // The admin panel is the home for authenticated users. Keep the "dashboard"
 // name so Breeze's post-auth redirects land on /admin.

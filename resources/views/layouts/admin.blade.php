@@ -25,6 +25,7 @@
                                 $nav = [
                                     'admin.dashboard' => 'Dashboard',
                                     'admin.posts.index' => 'Posts',
+                                    'admin.categories.index' => 'Categories',
                                     'admin.media.index' => 'Media',
                                 ];
                             @endphp

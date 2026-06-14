@@ -1,4 +1,5 @@
-@php($seo = $post?->seoMeta)
+{{-- Reusable SEO panel. Pass :seoModel for any HasSeoMeta model; defaults to $post. --}}
+@php($seo = ($seoModel ?? $post ?? null)?->seoMeta)
 
 <div class="space-y-5">
     <h3 class="text-sm font-semibold text-gray-800">SEO</h3>

@@ -1,11 +1,15 @@
 import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import ImageTool from '@editorjs/image';
-import Gallery from 'editorjs-gallery';
 import List from '@editorjs/list';
 import Quote from '@editorjs/quote';
 import CodeTool from '@editorjs/code';
 import Table from '@editorjs/table';
+
+// NOTE: `editorjs-gallery` is intentionally not imported. Its published build
+// is a webpack bundle (eval + css-loader runtime + .pcss) that breaks under
+// Vite and crashes the whole editor. Gallery is deferred until a Vite-
+// compatible package is chosen. The PHP renderer still supports gallery blocks.
 
 const csrfToken = () =>
     document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
@@ -45,10 +49,6 @@ export function createEditor({ holder, data = {}, onChange = null } = {}) {
                 class: ImageTool,
                 config: uploadConfig(),
             },
-            gallery: {
-                class: Gallery,
-                config: uploadConfig(),
-            },
             list: {
                 class: List,
                 inlineToolbar: true,
@@ -72,8 +72,12 @@ export function createEditor({ holder, data = {}, onChange = null } = {}) {
 
 // Auto-init: any [data-editor] element becomes an editor and syncs its JSON
 // into the hidden input named by [data-editor-input].
-document.addEventListener('DOMContentLoaded', () => {
+function bootEditors() {
     document.querySelectorAll('[data-editor]').forEach((el) => {
+        if (el.__editor) {
+            return;
+        }
+
         const input = el.dataset.editorInput
             ? document.querySelector(el.dataset.editorInput)
             : null;
@@ -97,4 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 : null,
         });
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootEditors);
+} else {
+    bootEditors();
+}

@@ -1,24 +1,10 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Media Library') }}
-        </h2>
+        <h1 class="text-xl font-semibold text-gray-800">Media Library</h1>
     </x-slot>
 
-    <div class="py-12">
-        <div class="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-
-            @if (session('status'))
-                <div class="rounded-md bg-green-50 p-4 text-sm text-green-800">
-                    {{ session('status') }}
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="rounded-md bg-red-50 p-4 text-sm text-red-800">
-                    {{ session('error') }}
-                </div>
-            @endif
+    <div>
+        <div class="space-y-6">
 
             {{-- Upload --}}
             <div class="overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg">
@@ -103,4 +89,4 @@
             @endif
         </div>
     </div>
-</x-app-layout>
+</x-admin-layout>

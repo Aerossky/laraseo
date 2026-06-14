@@ -45,7 +45,9 @@ class Post extends Model implements HasMedia
     {
         return SlugOptions::create()
             ->generateSlugsFrom('title')
-            ->saveSlugsTo('slug');
+            ->saveSlugsTo('slug')
+            ->preventOverwrite()          // allow a manually edited slug (FR-08)
+            ->doNotGenerateSlugsOnUpdate(); // keep permalinks stable when the title changes
     }
 
     public function registerMediaCollections(): void

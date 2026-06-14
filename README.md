@@ -13,8 +13,7 @@ Most Laravel developers skip SEO because setting it up from scratch is tedious. 
 - **Sitemap** — auto-generated, auto-updated on publish/unpublish
 - **Redirect manager** — 301 and 302 redirects managed from admin, no code change needed
 - **Media library** — upload once, reuse anywhere, alt text stored per file
-- **Block editor** — EditorJS with paragraph, heading, image, gallery, quote, list, code, TOC blocks
-- **Table of Contents** — place freely inside content, auto-generated from headings
+- **Block editor** — EditorJS with paragraph, heading (H2/H3), image, quote, list, code, and table blocks
 - **Admin panel** — simple Blade + Tailwind, no Filament, no heavy dependencies
 - **Global SEO settings** — site name, default meta format, Google verification tag, head/body scripts, robots.txt editor
 
@@ -61,7 +60,7 @@ php artisan key:generate
 # 5. Configure your database in .env, then run migrations
 php artisan migrate
 
-# 6. Seed the database (creates default admin account)
+# 6. Seed the database (admin account + a sample post, category, redirect & settings)
 php artisan db:seed
 
 # 7. Build assets
@@ -71,7 +70,7 @@ npm run build
 php artisan serve
 ```
 
-Admin panel available at `/admin`. Default credentials are in `DatabaseSeeder.php` — change them before deploying to production.
+Admin panel available at `/admin`. The seeder creates a default account — **`admin@example.com` / `password`** — change these credentials in `DatabaseSeeder.php` before deploying to production. The sample post is visible at `/blog`.
 
 ---
 
@@ -82,8 +81,8 @@ Admin panel available at `/admin`. Default credentials are in `DatabaseSeeder.ph
 SEO is not an afterthought here. It is built into the system:
 
 - H1 is always locked to the post title — one H1 per page, always
-- Meta title capped at 60 characters with a live counter in admin
-- Meta description capped at 160 characters with a live counter in admin
+- Meta title has a live counter in admin that warns past 60 characters
+- Meta description has a live counter in admin that warns past 160 characters
 - Canonical URL auto-set to current URL unless manually overridden
 - Schema markup (`Article`, `BreadcrumbList`) auto-generated per content type
 - All images require alt text before a post can be published
@@ -102,13 +101,20 @@ class Product extends Model
 ```
 
 ```php
-// In your controller
+// In your controller — inject SeoService and call for() with the model
+use App\Seo\SeoService;
+
+public function __construct(protected SeoService $seo) {}
+
 public function show(Product $product)
 {
-    seo()->for($product);
+    $this->seo->for($product);
+
     return view('products.show', compact('product'));
 }
 ```
+
+The `<x-seo-head />` component renders the resolved tags in your layout's `<head>`.
 
 ### Block editor (EditorJS)
 
@@ -117,11 +123,9 @@ Content is built with blocks — no raw HTML needed:
 - Type `/` to open block picker
 - Drag blocks to reorder
 - Insert images directly from media library
-- Available blocks: paragraph, heading (H2/H3), image, gallery, quote, list, code, table of contents
+- Available blocks: paragraph, heading (H2/H3), image, quote, list, code, table
 
-### Table of Contents
-
-Add a TOC block anywhere inside the post content. It auto-generates from all H2 and H3 headings in the post with smooth scroll anchors.
+> Gallery and Table of Contents blocks are planned for v2 (the server-side renderer already supports gallery output; the EditorJS tools are pending a Vite-compatible build).
 
 ### Redirect manager
 
@@ -175,6 +179,7 @@ If you need a full CMS out of the box, consider October CMS or Statamic. laraseo
 - Blog, categories, SEO fields, sitemap, redirects, media library, EditorJS, admin panel
 
 **v2 (planned)**
+- Gallery & Table of Contents editor blocks
 - Static pages (About, Contact)
 - User roles and permissions
 - Tag pages

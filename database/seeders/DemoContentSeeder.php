@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\CommentStatus;
 use App\Enums\PostStatus;
 use App\Enums\RedirectType;
 use App\Models\Category;
@@ -54,6 +55,27 @@ class DemoContentSeeder extends Seeder
             'og_description' => 'An SEO-first Laravel 13 blog starter kit.',
             'robots' => 'index, follow',
         ]);
+
+        // An approved sample comment plus one awaiting moderation, so a fresh
+        // clone shows both the public comment list and the admin badge.
+        $post->comments()->firstOrCreate(
+            ['author_email' => 'reader@example.com'],
+            [
+                'author_name' => 'Sam Reader',
+                'body' => 'This is exactly the SEO-first starter I was looking for. Thanks!',
+                'status' => CommentStatus::Approved,
+                'approved_at' => now()->subHours(12),
+            ],
+        );
+
+        $post->comments()->firstOrCreate(
+            ['author_email' => 'pending@example.com'],
+            [
+                'author_name' => 'Pat Pending',
+                'body' => 'Looks great — does it support multiple authors?',
+                'status' => CommentStatus::Pending,
+            ],
+        );
 
         Redirect::firstOrCreate(
             ['from_url' => '/welcome'],

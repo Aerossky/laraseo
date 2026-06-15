@@ -18,9 +18,13 @@
             ['label' => 'Categories', 'route' => 'admin.categories.index'],
             ['label' => 'Media', 'route' => 'admin.media.index'],
         ]],
+        ['label' => 'Comments', 'route' => 'admin.comments.index'],
         ['label' => 'Redirects', 'route' => 'admin.redirects.index'],
         ['label' => 'Settings', 'route' => 'admin.settings.index'],
     ];
+
+    // Pending comments awaiting moderation — surfaced as a nav badge.
+    $pendingComments = \App\Models\Comment::pending()->count();
 
     // A link is active when its route (or any nested page under it) matches.
     $isActive = fn (string $route): bool => request()->routeIs(str_replace('.index', '.*', $route));
@@ -60,8 +64,11 @@
                             </div>
                         @else
                             <a href="{{ route($item['route']) }}"
-                                class="inline-flex items-center border-b-2 px-3 pt-1 text-sm font-medium {{ $isActive($item['route']) ? 'border-gray-800 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">
+                                class="inline-flex items-center gap-1.5 border-b-2 px-3 pt-1 text-sm font-medium {{ $isActive($item['route']) ? 'border-gray-800 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }}">
                                 {{ $item['label'] }}
+                                @if ($item['route'] === 'admin.comments.index' && $pendingComments > 0)
+                                    <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-semibold text-white">{{ $pendingComments }}</span>
+                                @endif
                             </a>
                         @endif
                     @endforeach

@@ -29,7 +29,7 @@ class BlogController extends Controller
     {
         abort_unless($post->isPublished(), 404);
 
-        $post->load(['category', 'seoMeta', 'media']);
+        $post->load(['category', 'seoMeta', 'media', 'approvedComments.user']);
 
         $this->seo->for($post);
 

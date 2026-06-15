@@ -75,7 +75,7 @@ class EditorJsRenderer
     /** @param array<string, mixed> $data */
     protected function header(array $data): string
     {
-        // SEO: never emit H1 — clamp to H2/H3 (CLAUDE.md, FR-48).
+        // SEO: never emit H1 — clamp to H2/H3 (FR-48).
         $level = max(2, min(3, (int) ($data['level'] ?? 2)));
         $text = $this->inline($data['text'] ?? '');
         $slug = Str::slug(strip_tags($data['text'] ?? ''));

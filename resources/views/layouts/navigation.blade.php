@@ -11,20 +11,27 @@
      * `.index` suffix so the active-state matcher highlights every nested page
      * (create, edit, …) under that section.
      */
-    $nav = [
-        ['label' => 'Dashboard', 'route' => 'admin.dashboard'],
-        ['label' => 'Blog', 'children' => [
-            ['label' => 'Posts', 'route' => 'admin.posts.index'],
-            ['label' => 'Categories', 'route' => 'admin.categories.index'],
-            ['label' => 'Media', 'route' => 'admin.media.index'],
-        ]],
-        ['label' => 'Comments', 'route' => 'admin.comments.index'],
-        ['label' => 'Redirects', 'route' => 'admin.redirects.index'],
-        ['label' => 'Settings', 'route' => 'admin.settings.index'],
-    ];
+    $user = Auth::user();
+    $managesContent = $user->managesContent();
+    $managesSite = $user->managesSite();
 
-    // Pending comments awaiting moderation — surfaced as a nav badge.
-    $pendingComments = \App\Models\Comment::pending()->count();
+    // Menu is filtered by role: authors see only Posts + Media; editors add
+    // content management; admins add site configuration and user management.
+    $nav = array_values(array_filter([
+        ['label' => 'Dashboard', 'route' => 'admin.dashboard'],
+        ['label' => 'Blog', 'children' => array_values(array_filter([
+            ['label' => 'Posts', 'route' => 'admin.posts.index'],
+            $managesContent ? ['label' => 'Categories', 'route' => 'admin.categories.index'] : null,
+            ['label' => 'Media', 'route' => 'admin.media.index'],
+        ]))],
+        $managesContent ? ['label' => 'Comments', 'route' => 'admin.comments.index'] : null,
+        $managesSite ? ['label' => 'Redirects', 'route' => 'admin.redirects.index'] : null,
+        $managesSite ? ['label' => 'Users', 'route' => 'admin.users.index'] : null,
+        $managesSite ? ['label' => 'Settings', 'route' => 'admin.settings.index'] : null,
+    ]));
+
+    // Pending comments awaiting moderation — only relevant to moderators.
+    $pendingComments = $managesContent ? \App\Models\Comment::pending()->count() : 0;
 
     // A link is active when its route (or any nested page under it) matches.
     $isActive = fn (string $route): bool => request()->routeIs(str_replace('.index', '.*', $route));

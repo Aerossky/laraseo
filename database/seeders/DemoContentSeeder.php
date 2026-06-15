@@ -5,9 +5,11 @@ namespace Database\Seeders;
 use App\Enums\CommentStatus;
 use App\Enums\PostStatus;
 use App\Enums\RedirectType;
+use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Redirect;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -35,10 +37,13 @@ class DemoContentSeeder extends Seeder
             'meta_description' => 'Tutorials and tips to help you launch an SEO-first blog with laraseo.',
         ]);
 
+        $author = User::where('role', UserRole::Admin)->first();
+
         $post = Post::firstOrCreate(
             ['slug' => 'welcome-to-laraseo'],
             [
                 'category_id' => $category->id,
+                'author_id' => $author?->id,
                 'title' => 'Welcome to laraseo',
                 'excerpt' => 'An SEO-first Laravel blog starter — H1 locking, canonical URLs, sitemaps, and structured data, all enforced at the system level.',
                 'content' => $this->sampleContent(),

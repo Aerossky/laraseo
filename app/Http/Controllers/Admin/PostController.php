@@ -17,13 +17,23 @@ class PostController extends Controller
 
     public function index(): View
     {
+        $this->authorize('viewAny', Post::class);
+
+        $user = request()->user();
+
         return view('admin.posts.index', [
-            'posts' => Post::with('category')->latest()->paginate(15),
+            'posts' => Post::with(['category', 'author'])
+                // Authors only see their own posts; content managers see all.
+                ->unless($user->managesContent(), fn ($query) => $query->where('author_id', $user->id))
+                ->latest()
+                ->paginate(15),
         ]);
     }
 
     public function create(): View
     {
+        $this->authorize('create', Post::class);
+
         return view('admin.posts.create', [
             'post' => null,
             'categories' => Category::orderBy('name')->get(),
@@ -32,13 +42,20 @@ class PostController extends Controller
 
     public function store(StorePostRequest $request): RedirectResponse
     {
-        $this->posts->create($request->validated(), $request->file('featured_image'));
+        $this->authorize('create', Post::class);
+
+        $this->posts->create(
+            [...$request->validated(), 'author_id' => $request->user()->id],
+            $request->file('featured_image'),
+        );
 
         return redirect()->route('admin.posts.index')->with('status', 'Post created.');
     }
 
     public function edit(Post $post): View
     {
+        $this->authorize('update', $post);
+
         $post->load('seoMeta', 'media');
 
         return view('admin.posts.edit', [
@@ -49,6 +66,8 @@ class PostController extends Controller
 
     public function update(UpdatePostRequest $request, Post $post): RedirectResponse
     {
+        $this->authorize('update', $post);
+
         $this->posts->update($post, $request->validated(), $request->file('featured_image'));
 
         return redirect()->route('admin.posts.index')->with('status', 'Post updated.');
@@ -56,6 +75,8 @@ class PostController extends Controller
 
     public function destroy(Post $post): RedirectResponse
     {
+        $this->authorize('delete', $post);
+
         $post->delete();
 
         return back()->with('status', 'Post deleted.');

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -16,12 +17,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Default admin account — CHANGE THESE CREDENTIALS before going live.
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-        ]);
+        // Default accounts — CHANGE THESE CREDENTIALS before going live.
+        // One per role so each permission level can be tried out immediately.
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            ['name' => 'Admin User', 'password' => Hash::make('password'), 'role' => UserRole::Admin],
+        );
+
+        User::firstOrCreate(
+            ['email' => 'editor@example.com'],
+            ['name' => 'Editor User', 'password' => Hash::make('password'), 'role' => UserRole::Editor],
+        );
+
+        User::firstOrCreate(
+            ['email' => 'author@example.com'],
+            ['name' => 'Author User', 'password' => Hash::make('password'), 'role' => UserRole::Author],
+        );
 
         $this->call([
             SettingsSeeder::class,

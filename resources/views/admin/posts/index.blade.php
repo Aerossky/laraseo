@@ -19,6 +19,9 @@
                         <th class="px-6 py-3 font-medium">Title</th>
                         <th class="px-6 py-3 font-medium">Status</th>
                         <th class="px-6 py-3 font-medium">Category</th>
+                        @if (auth()->user()->managesContent())
+                            <th class="px-6 py-3 font-medium">Author</th>
+                        @endif
                         <th class="px-6 py-3 font-medium">Published</th>
                         <th class="px-6 py-3"></th>
                     </tr>
@@ -34,6 +37,9 @@
                             </td>
                             <td class="px-6 py-3"><x-post-status :status="$post->status" /></td>
                             <td class="px-6 py-3 text-gray-600">{{ $post->category?->name ?? '—' }}</td>
+                            @if (auth()->user()->managesContent())
+                                <td class="px-6 py-3 text-gray-600">{{ $post->author?->name ?? '—' }}</td>
+                            @endif
                             <td class="px-6 py-3 text-gray-500">
                                 {{ $post->published_at?->format('M j, Y') ?? '—' }}
                             </td>

@@ -16,6 +16,8 @@ class CommentController extends Controller
 
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', Comment::class);
+
         $status = CommentStatus::tryFrom((string) $request->query('status', 'pending'));
 
         return view('admin.comments.index', [
@@ -32,6 +34,8 @@ class CommentController extends Controller
 
     public function approve(Comment $comment): RedirectResponse
     {
+        $this->authorize('update', $comment);
+
         $this->comments->approve($comment);
 
         return back()->with('status', 'Comment approved.');
@@ -39,6 +43,8 @@ class CommentController extends Controller
 
     public function spam(Comment $comment): RedirectResponse
     {
+        $this->authorize('update', $comment);
+
         $this->comments->markSpam($comment);
 
         return back()->with('status', 'Comment marked as spam.');
@@ -46,6 +52,8 @@ class CommentController extends Controller
 
     public function destroy(Comment $comment): RedirectResponse
     {
+        $this->authorize('delete', $comment);
+
         $comment->delete();
 
         return back()->with('status', 'Comment deleted.');

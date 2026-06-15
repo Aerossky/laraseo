@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\RedirectController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\CommentController;
 use App\Http\Controllers\ProfileController;
@@ -52,6 +53,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
+
+    Route::resource('users', UserController::class)->except('show');
 
     Route::get('comments', [AdminCommentController::class, 'index'])->name('comments.index');
     Route::patch('comments/{comment}/approve', [AdminCommentController::class, 'approve'])->name('comments.approve');

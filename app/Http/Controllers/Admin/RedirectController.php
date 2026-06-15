@@ -13,6 +13,8 @@ class RedirectController extends Controller
 {
     public function index(): View
     {
+        $this->authorize('viewAny', Redirect::class);
+
         return view('admin.redirects.index', [
             'redirects' => Redirect::latest()->paginate(15),
         ]);
@@ -20,6 +22,8 @@ class RedirectController extends Controller
 
     public function create(): View
     {
+        $this->authorize('create', Redirect::class);
+
         return view('admin.redirects.create', [
             'redirect' => null,
         ]);
@@ -27,6 +31,8 @@ class RedirectController extends Controller
 
     public function store(StoreRedirectRequest $request): RedirectResponse
     {
+        $this->authorize('create', Redirect::class);
+
         Redirect::create($request->validated());
 
         return redirect()->route('admin.redirects.index')->with('status', 'Redirect created.');
@@ -34,6 +40,8 @@ class RedirectController extends Controller
 
     public function edit(Redirect $redirect): View
     {
+        $this->authorize('update', $redirect);
+
         return view('admin.redirects.edit', [
             'redirect' => $redirect,
         ]);
@@ -41,6 +49,8 @@ class RedirectController extends Controller
 
     public function update(UpdateRedirectRequest $request, Redirect $redirect): RedirectResponse
     {
+        $this->authorize('update', $redirect);
+
         $redirect->update($request->validated());
 
         return redirect()->route('admin.redirects.index')->with('status', 'Redirect updated.');
@@ -48,6 +58,8 @@ class RedirectController extends Controller
 
     public function toggle(Redirect $redirect): RedirectResponse
     {
+        $this->authorize('update', $redirect);
+
         $redirect->update(['is_active' => ! $redirect->is_active]);
 
         return back()->with('status', $redirect->is_active ? 'Redirect activated.' : 'Redirect deactivated.');

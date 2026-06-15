@@ -78,7 +78,15 @@ php artisan serve
 ```
 </details>
 
-Admin panel available at `/admin`. The seeder creates a default account — **`admin@example.com` / `password`** — change these credentials in `DatabaseSeeder.php` before deploying to production. The blog is the site home page at `/`.
+Admin panel available at `/admin`. The seeder creates one account per role — all with password **`password`**:
+
+| Email | Role | Can do |
+| --- | --- | --- |
+| `admin@example.com` | Admin | Everything, including users, settings, and redirects |
+| `editor@example.com` | Editor | All posts (any author), categories, and comment moderation |
+| `author@example.com` | Author | Only their own posts, plus media |
+
+Change these credentials in `DatabaseSeeder.php` before deploying to production. The blog is the site home page at `/`.
 
 ---
 

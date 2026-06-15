@@ -64,7 +64,7 @@ class PostService
     protected function attributes(array $data): array
     {
         return Arr::only($data, [
-            'title', 'slug', 'category_id', 'excerpt', 'content', 'status', 'published_at', 'show_toc',
+            'title', 'slug', 'category_id', 'author_id', 'excerpt', 'content', 'status', 'published_at', 'show_toc',
         ]);
     }
 

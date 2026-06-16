@@ -1,4 +1,4 @@
-<x-public-layout>
+<x-app-layout>
     <x-breadcrumb :items="[
         ['name' => 'Blog', 'url' => route('blog.index')],
         ['name' => $category->name, 'url' => route('blog.category', $category)],
@@ -23,4 +23,4 @@
     <div class="mt-8">
         {{ $posts->links() }}
     </div>
-</x-public-layout>
+</x-app-layout>

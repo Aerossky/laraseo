@@ -1,6 +1,6 @@
 @php($featured = $post->getFirstMedia('featured'))
 
-<x-public-layout>
+<x-app-layout>
     <x-breadcrumb :items="[
         ['name' => 'Blog', 'url' => route('blog.index')],
         $post->category
@@ -36,4 +36,4 @@
     </article>
 
     <x-comments :post="$post" />
-</x-public-layout>
+</x-app-layout>

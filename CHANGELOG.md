@@ -5,6 +5,25 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-06-16
+
+### Changed
+
+- Reorganized Blade layouts for clarity: the public layout moved to
+  `layouts/app.blade.php` and is now used as `<x-app-layout>` (the standard
+  Laravel convention), and the admin navigation moved to
+  `admin/partials/navigation.blade.php` so `layouts/` holds only layouts.
+
+### Fixed
+
+- The `AppLayout` view component pointed at a missing `layouts/app.blade.php`;
+  it now resolves correctly.
+
+### Note
+
+- For anyone tracking upstream: the public layout tag changed from
+  `<x-public-layout>` to `<x-app-layout>`.
+
 ## [1.1.0] - 2026-06-16
 
 ### Added
@@ -37,5 +56,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   generated XML sitemap.
 - Redirect management and configurable site settings, with seeded demo content.
 
+[1.1.1]: https://github.com/Aerossky/laraseo/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Aerossky/laraseo/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Aerossky/laraseo/releases/tag/v1.0.0

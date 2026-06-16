@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -30,7 +31,25 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // Default to admin so a factory user has full panel access; use the
+            // editor()/author() states for lower-privileged accounts.
+            'role' => UserRole::Admin,
         ];
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn (): array => ['role' => UserRole::Admin]);
+    }
+
+    public function editor(): static
+    {
+        return $this->state(fn (): array => ['role' => UserRole::Editor]);
+    }
+
+    public function author(): static
+    {
+        return $this->state(fn (): array => ['role' => UserRole::Author]);
     }
 
     /**

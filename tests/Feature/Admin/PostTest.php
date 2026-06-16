@@ -4,6 +4,7 @@ use App\Enums\PostStatus;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
+use App\Services\MediaService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -115,6 +116,47 @@ it('attaches a featured image with alt text', function () {
 
     expect($post->getFirstMediaUrl('featured'))->not->toBe('')
         ->and($post->getFirstMedia('featured')->getCustomProperty('alt'))->toBe('Hero alt');
+});
+
+it('records an uploaded featured image in the media library', function () {
+    Storage::fake('public');
+
+    $this->post(route('admin.posts.store'), postData([
+        'featured_image' => UploadedFile::fake()->image('hero.jpg'),
+        'featured_alt' => 'Hero alt',
+    ]))->assertRedirect(route('admin.posts.index'));
+
+    // The upload lands in the shared library catalog (with its alt), and a copy
+    // is attached to the post's featured collection.
+    $library = app(MediaService::class)->all();
+
+    expect($library)->toHaveCount(1)
+        ->and($library->first()->getCustomProperty('alt'))->toBe('Hero alt')
+        ->and(Post::first()->getFirstMedia('featured'))->not->toBeNull();
+});
+
+it('sets the featured image from an existing library image', function () {
+    Storage::fake('public');
+
+    $libraryImage = app(MediaService::class)
+        ->upload(UploadedFile::fake()->image('library.jpg'));
+    app(MediaService::class)->updateAltText($libraryImage, 'Library alt');
+
+    $this->post(route('admin.posts.store'), postData([
+        'featured_media_id' => $libraryImage->id,
+    ]))->assertRedirect(route('admin.posts.index'));
+
+    $featured = Post::first()->getFirstMedia('featured');
+
+    expect($featured)->not->toBeNull()
+        ->and($featured->collection_name)->toBe('featured')
+        ->and($featured->getCustomProperty('alt'))->toBe('Library alt');
+});
+
+it('rejects a featured_media_id that is not a library image', function () {
+    $this->post(route('admin.posts.store'), postData([
+        'featured_media_id' => 999,
+    ]))->assertSessionHasErrors('featured_media_id');
 });
 
 it('renders the edit form', function () {

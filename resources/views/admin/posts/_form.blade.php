@@ -105,20 +105,101 @@
                 <p class="mt-1 text-xs text-gray-400">Required before publishing.</p>
             </div>
 
-            <div class="rounded-lg bg-white p-6 shadow-sm">
+            <div class="rounded-lg bg-white p-6 shadow-sm"
+                x-data="{
+                    open: false,
+                    mediaId: @js(old('featured_media_id', '')),
+                    previewUrl: @js($featured?->getUrl() ?? ''),
+                    alt: @js(old('featured_alt', $featured?->getCustomProperty('alt', ''))),
+                    selectFromLibrary(id, url, alt) {
+                        this.mediaId = id;
+                        this.previewUrl = url;
+                        if (alt) { this.alt = alt; }
+                        this.$refs.fileInput.value = '';
+                        this.open = false;
+                    },
+                    previewUpload(event) {
+                        const file = event.target.files[0];
+                        if (!file) { return; }
+                        this.mediaId = '';
+                        this.previewUrl = URL.createObjectURL(file);
+                    },
+                    clear() {
+                        this.mediaId = '';
+                        this.previewUrl = '';
+                        this.$refs.fileInput.value = '';
+                    },
+                }">
                 <label class="block text-sm font-medium text-gray-700">Featured image</label>
-                @if ($featured)
-                    <img src="{{ $featured->getUrl() }}" alt="{{ $featured->getCustomProperty('alt', '') }}"
-                        loading="lazy" class="mt-2 aspect-video w-full rounded-md object-cover" />
-                @endif
-                <input type="file" name="featured_image" accept="image/jpeg,image/png,image/webp,image/gif"
-                    class="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm hover:file:bg-gray-200" />
+
+                <input type="hidden" name="featured_media_id" :value="mediaId" />
+
+                <template x-if="previewUrl">
+                    <div class="relative mt-2">
+                        <img :src="previewUrl" :alt="alt" loading="lazy"
+                            class="aspect-video w-full rounded-md object-cover" />
+                        <button type="button" @click="clear()"
+                            class="absolute right-2 top-2 rounded-full bg-gray-900/70 px-2 py-0.5 text-xs font-medium text-white hover:bg-gray-900">
+                            Remove
+                        </button>
+                    </div>
+                </template>
+
+                <div class="mt-2 flex flex-col gap-2">
+                    <button type="button" @click="open = true"
+                        class="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Choose from library
+                    </button>
+                    <input type="file" name="featured_image" x-ref="fileInput" @change="previewUpload($event)"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        class="block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm hover:file:bg-gray-200" />
+                    <p class="text-xs text-gray-400">Pick an existing image or upload a new one.</p>
+                </div>
                 @error('featured_image') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                @error('featured_media_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
 
                 <label for="featured_alt" class="mt-3 block text-sm font-medium text-gray-700">Featured image alt</label>
-                <input type="text" id="featured_alt" name="featured_alt"
+                <input type="text" id="featured_alt" name="featured_alt" x-model="alt"
                     value="{{ old('featured_alt', $featured?->getCustomProperty('alt', '')) }}" maxlength="255"
                     class="mt-1 block w-full rounded-md border-gray-300 text-sm focus:border-gray-500 focus:ring-gray-500" />
+
+                {{-- Library picker modal --}}
+                <template x-teleport="body">
+                    <div x-show="open" x-cloak @keydown.escape.window="open = false"
+                        class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <div class="absolute inset-0 bg-gray-900/50" @click="open = false"></div>
+                        <div class="relative flex max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg bg-white shadow-xl">
+                            <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                                <h3 class="text-sm font-semibold text-gray-800">Choose from media library</h3>
+                                <button type="button" @click="open = false" class="text-gray-400 hover:text-gray-600">&times;</button>
+                            </div>
+                            <div class="overflow-y-auto p-6">
+                                @if ($library->isEmpty())
+                                    <p class="text-center text-sm text-gray-500">
+                                        No images yet. Upload some in the
+                                        <a href="{{ route('admin.media.index') }}" class="text-gray-700 underline">Media Library</a>.
+                                    </p>
+                                @else
+                                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                                        @foreach ($library as $item)
+                                            <button type="button"
+                                                @click="selectFromLibrary(@js($item->id), @js($item->getUrl()), @js($item->getCustomProperty('alt', '')))"
+                                                class="group overflow-hidden rounded-md border border-gray-200 text-left hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                                <span class="block aspect-video bg-gray-50">
+                                                    <img src="{{ $item->getUrl() }}" alt="{{ $item->getCustomProperty('alt', '') }}"
+                                                        loading="lazy" class="h-full w-full object-cover" />
+                                                </span>
+                                                <span class="block truncate px-2 py-1 text-xs text-gray-600" title="{{ $item->file_name }}">
+                                                    {{ $item->file_name }}
+                                                </span>
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             @if ($isEdit)

@@ -56,6 +56,17 @@ it('falls back to media alt text when the image has no caption', function () {
         ->and($html)->not->toContain('<figcaption>');
 });
 
+it('renders a library image block through the image path', function () {
+    $html = renderBlocks([
+        ['type' => 'libraryImage', 'data' => ['file' => ['url' => '/storage/lib.jpg'], 'caption' => 'From library']],
+    ]);
+
+    expect($html)->toContain('<figure>')
+        ->and($html)->toContain('src="/storage/lib.jpg"')
+        ->and($html)->toContain('alt="From library"')
+        ->and($html)->toContain('loading="lazy"');
+});
+
 it('renders a gallery as a lazy image grid', function () {
     $html = renderBlocks([
         ['type' => 'gallery', 'data' => [

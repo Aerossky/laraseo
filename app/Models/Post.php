@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
@@ -24,8 +25,12 @@ class Post extends Model implements HasMedia
     /** @use HasFactory<PostFactory> */
     use HasFactory, HasSeoMeta, HasSlug, InteractsWithMedia, SoftDeletes;
 
+    /** The media collection holding the post's featured image. */
+    public const FEATURED_COLLECTION = 'featured';
+
     protected $fillable = [
         'category_id',
+        'author_id',
         'title',
         'slug',
         'excerpt',
@@ -56,7 +61,7 @@ class Post extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('featured')
+        $this->addMediaCollection(self::FEATURED_COLLECTION)
             ->singleFile()
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
     }
@@ -65,6 +70,24 @@ class Post extends Model implements HasMedia
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
+
+    /** @return HasMany<Comment, $this> */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    /** @return HasMany<Comment, $this> */
+    public function approvedComments(): HasMany
+    {
+        return $this->comments()->approved()->latest();
     }
 
     public function getSeoTitle(): ?string
@@ -94,7 +117,7 @@ class Post extends Model implements HasMedia
 
     public function getSeoImageUrl(): ?string
     {
-        $url = $this->getFirstMediaUrl('featured');
+        $url = $this->getFirstMediaUrl(self::FEATURED_COLLECTION);
 
         return $url !== '' ? $url : null;
     }

@@ -5,6 +5,7 @@ import List from '@editorjs/list';
 import Quote from '@editorjs/quote';
 import CodeTool from '@editorjs/code';
 import Table from '@editorjs/table';
+import LibraryImage from './library-image';
 
 // NOTE: `editorjs-gallery` is intentionally not imported. Its published build
 // is a webpack bundle (eval + css-loader runtime + .pcss) that breaks under
@@ -48,6 +49,10 @@ export function createEditor({ holder, data = {}, onChange = null } = {}) {
             image: {
                 class: ImageTool,
                 config: uploadConfig(),
+            },
+            libraryImage: {
+                class: LibraryImage,
+                config: { endpoint: '/admin/media/library' },
             },
             list: {
                 class: List,

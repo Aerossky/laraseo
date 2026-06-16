@@ -23,6 +23,21 @@ class MediaController extends Controller
     }
 
     /**
+     * Return the media library as JSON for the EditorJS library picker.
+     */
+    public function library(): JsonResponse
+    {
+        return response()->json(
+            $this->media->all()->map(fn (Media $item) => [
+                'id' => $item->id,
+                'url' => $item->getUrl(),
+                'alt' => $item->getCustomProperty('alt', ''),
+                'fileName' => $item->file_name,
+            ])->values()
+        );
+    }
+
+    /**
      * Handle an upload. Returns an EditorJS-compatible JSON payload for XHR
      * requests, or redirects back for the media grid form (FR-49).
      */

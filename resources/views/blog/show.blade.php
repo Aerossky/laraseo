@@ -34,4 +34,6 @@
 
         <x-post-content :blocks="$post->content" />
     </article>
+
+    <x-comments :post="$post" />
 </x-public-layout>

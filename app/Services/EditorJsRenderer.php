@@ -17,6 +17,9 @@ class EditorJsRenderer
     /** Inline tags allowed inside text blocks (EditorJS inline tools). */
     protected const ALLOWED_INLINE = '<b><strong><i><em><u><s><a><mark><code><br>';
 
+    /** Block types that carry a single image and share the image renderer/alt rules. */
+    public const IMAGE_BLOCKS = ['image', 'libraryImage'];
+
     /**
      * @param  array<string, mixed>|string|null  $content
      */
@@ -48,12 +51,16 @@ class EditorJsRenderer
      */
     protected function renderBlock(array $block): string
     {
+        $type = $block['type'] ?? '';
         $data = $block['data'] ?? [];
 
-        return match ($block['type'] ?? '') {
+        if (in_array($type, self::IMAGE_BLOCKS, true)) {
+            return $this->image($data);
+        }
+
+        return match ($type) {
             'paragraph' => $this->paragraph($data),
             'header' => $this->header($data),
-            'image' => $this->image($data),
             'gallery' => $this->gallery($data),
             'quote' => $this->quote($data),
             'list' => $this->list($data),

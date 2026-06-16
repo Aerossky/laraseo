@@ -16,6 +16,8 @@ class CategoryController extends Controller
 
     public function index(): View
     {
+        $this->authorize('viewAny', Category::class);
+
         return view('admin.categories.index', [
             'categories' => Category::withCount('posts')->orderBy('name')->paginate(15),
         ]);
@@ -23,6 +25,8 @@ class CategoryController extends Controller
 
     public function create(): View
     {
+        $this->authorize('create', Category::class);
+
         return view('admin.categories.create', [
             'category' => null,
         ]);
@@ -30,6 +34,8 @@ class CategoryController extends Controller
 
     public function store(StoreCategoryRequest $request): RedirectResponse
     {
+        $this->authorize('create', Category::class);
+
         $this->categories->create($request->validated());
 
         return redirect()->route('admin.categories.index')->with('status', 'Category created.');
@@ -37,6 +43,8 @@ class CategoryController extends Controller
 
     public function edit(Category $category): View
     {
+        $this->authorize('update', $category);
+
         $category->load('seoMeta');
 
         return view('admin.categories.edit', [
@@ -46,6 +54,8 @@ class CategoryController extends Controller
 
     public function update(UpdateCategoryRequest $request, Category $category): RedirectResponse
     {
+        $this->authorize('update', $category);
+
         $this->categories->update($category, $request->validated());
 
         return redirect()->route('admin.categories.index')->with('status', 'Category updated.');
@@ -53,6 +63,8 @@ class CategoryController extends Controller
 
     public function destroy(Category $category): RedirectResponse
     {
+        $this->authorize('delete', $category);
+
         $category->delete();
 
         return back()->with('status', 'Category deleted.');

@@ -1,4 +1,4 @@
-<x-public-layout>
+<x-app-layout>
     <h1 class="mb-8 text-3xl font-bold text-gray-900">Blog</h1>
 
     @forelse ($posts as $post)
@@ -12,4 +12,4 @@
     <div class="mt-8">
         {{ $posts->links() }}
     </div>
-</x-public-layout>
+</x-app-layout>

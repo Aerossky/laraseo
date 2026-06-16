@@ -7,13 +7,14 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Category;
 use App\Models\Post;
+use App\Services\MediaService;
 use App\Services\PostService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class PostController extends Controller
 {
-    public function __construct(protected PostService $posts) {}
+    public function __construct(protected PostService $posts, protected MediaService $media) {}
 
     public function index(): View
     {
@@ -37,6 +38,7 @@ class PostController extends Controller
         return view('admin.posts.create', [
             'post' => null,
             'categories' => Category::orderBy('name')->get(),
+            'library' => $this->media->all(),
         ]);
     }
 
@@ -61,6 +63,7 @@ class PostController extends Controller
         return view('admin.posts.edit', [
             'post' => $post,
             'categories' => Category::orderBy('name')->get(),
+            'library' => $this->media->all(),
         ]);
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\PostStatus;
+use App\Models\MediaLibrary;
 use App\Services\PostService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -53,6 +54,7 @@ class StorePostRequest extends FormRequest
             'published_at' => ['nullable', 'date', Rule::requiredIf($this->input('status') === PostStatus::Scheduled->value)],
             'show_toc' => ['boolean'],
             'featured_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
+            'featured_media_id' => ['nullable', 'integer', Rule::exists('media', 'id')->where('collection_name', MediaLibrary::COLLECTION)],
             'featured_alt' => ['nullable', 'string', 'max:255'],
             'seo' => ['array'],
             'seo.meta_title' => ['nullable', 'string', 'max:255'],

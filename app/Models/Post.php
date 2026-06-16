@@ -25,6 +25,9 @@ class Post extends Model implements HasMedia
     /** @use HasFactory<PostFactory> */
     use HasFactory, HasSeoMeta, HasSlug, InteractsWithMedia, SoftDeletes;
 
+    /** The media collection holding the post's featured image. */
+    public const FEATURED_COLLECTION = 'featured';
+
     protected $fillable = [
         'category_id',
         'author_id',
@@ -58,7 +61,7 @@ class Post extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('featured')
+        $this->addMediaCollection(self::FEATURED_COLLECTION)
             ->singleFile()
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
     }
@@ -114,7 +117,7 @@ class Post extends Model implements HasMedia
 
     public function getSeoImageUrl(): ?string
     {
-        $url = $this->getFirstMediaUrl('featured');
+        $url = $this->getFirstMediaUrl(self::FEATURED_COLLECTION);
 
         return $url !== '' ? $url : null;
     }

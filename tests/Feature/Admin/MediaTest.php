@@ -2,6 +2,8 @@
 
 use App\Models\Post;
 use App\Models\User;
+use App\Services\MediaService;
+use App\Services\PostService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -30,6 +32,56 @@ it('requires authentication to access the media library', function () {
 
 it('shows the media library index', function () {
     $this->get(route('admin.media.index'))->assertOk();
+});
+
+it('propagates a library alt change to featured copies, preserving overrides', function () {
+    $media = uploadImage('shared.jpg');
+    $mediaService = app(MediaService::class);
+    $postService = app(PostService::class);
+    $mediaService->updateAltText($media, 'Original');
+
+    $tracking = Post::factory()->create();
+    $postService->update($tracking, ['featured_media_id' => $media->id, 'featured_alt' => 'Original'], null);
+
+    $overridden = Post::factory()->create();
+    $postService->update($overridden, ['featured_media_id' => $media->id, 'featured_alt' => 'Custom override'], null);
+
+    $this->patch(route('admin.media.update', $media), ['alt' => 'Updated']);
+
+    expect($tracking->fresh()->getFirstMedia('featured')->getCustomProperty('alt'))->toBe('Updated')
+        ->and($overridden->fresh()->getFirstMedia('featured')->getCustomProperty('alt'))->toBe('Custom override');
+});
+
+it('propagates a library alt change to content blocks that track it', function () {
+    $media = uploadImage('inline.jpg');
+    app(MediaService::class)->updateAltText($media, 'Original');
+    $url = $media->getUrl();
+
+    $post = Post::factory()->create(['content' => ['blocks' => [
+        ['type' => 'libraryImage', 'data' => ['file' => ['url' => $url, 'alt' => 'Original'], 'caption' => 'Original']],
+        ['type' => 'image', 'data' => ['file' => ['url' => $url, 'alt' => 'Original'], 'caption' => 'My caption']],
+    ]]]);
+
+    $this->patch(route('admin.media.update', $media), ['alt' => 'Updated']);
+
+    $blocks = $post->fresh()->content['blocks'];
+
+    expect($blocks[0]['data']['caption'])->toBe('Updated')
+        ->and($blocks[0]['data']['file']['alt'])->toBe('Updated')
+        ->and($blocks[1]['data']['caption'])->toBe('My caption')
+        ->and($blocks[1]['data']['file']['alt'])->toBe('Updated');
+});
+
+it('returns the media library as JSON for the editor picker', function () {
+    $media = uploadImage('library.jpg');
+    app(MediaService::class)->updateAltText($media, 'A described image');
+
+    $this->getJson(route('admin.media.library'))
+        ->assertOk()
+        ->assertJsonFragment([
+            'id' => $media->id,
+            'alt' => 'A described image',
+        ]);
 });
 
 it('uploads a valid image and returns an EditorJS response', function () {

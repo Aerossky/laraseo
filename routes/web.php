@@ -47,6 +47,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('redirects', RedirectController::class)->except('show');
 
     Route::get('media', [MediaController::class, 'index'])->name('media.index');
+    Route::get('media/library', [MediaController::class, 'library'])->name('media.library');
     Route::post('media/upload', [MediaController::class, 'upload'])->name('media.upload');
     Route::patch('media/{media}', [MediaController::class, 'update'])->name('media.update');
     Route::delete('media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');

@@ -85,7 +85,7 @@ class EditorJsRenderer
                 continue;
             }
             if (! $openSublist) {
-                $items .= '<ul class="mt-1.5 space-y-1.5 pl-4">';
+                $items .= '<ul class="mt-1 space-y-1 border-l border-gray-200 pl-3">';
                 $openSublist = true;
             }
             $items .= '<li>'.$this->tocLink($heading).'</li>';
@@ -98,13 +98,17 @@ class EditorJsRenderer
             $items .= '</li>';
         }
 
-        return new HtmlString('<ul class="space-y-1.5">'.$items.'</ul>');
+        return new HtmlString('<ul class="space-y-1 text-sm">'.$items.'</ul>');
     }
 
     /** @param array{slug: string, text: string, level: int} $heading */
     protected function tocLink(array $heading): string
     {
-        return '<a href="#'.e($heading['slug']).'" class="text-gray-600 transition-colors hover:text-gray-900">'
+        // H2 entries read as the primary outline; nested H3s are lighter.
+        $emphasis = $heading['level'] === 2 ? 'font-medium text-gray-700' : 'text-gray-500';
+
+        return '<a href="#'.e($heading['slug']).'"'
+            .' class="block rounded-md px-2 py-1 transition-colors hover:bg-gray-200/70 hover:text-gray-900 '.$emphasis.'">'
             .e($heading['text']).'</a>';
     }
 

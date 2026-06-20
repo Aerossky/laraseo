@@ -37,7 +37,11 @@
         @endif
 
         <x-post-content :blocks="$post->content" />
+
+        <x-share-buttons :post="$post" />
     </article>
+
+    <x-author-box :author="$post->author" />
 
     <x-comments :post="$post" />
 </x-app-layout>

@@ -21,6 +21,7 @@ class UpdateSettingsRequest extends FormRequest
             'meta_title_format' => ['nullable', 'string', 'max:255'],
             'meta_description_fallback' => ['nullable', 'string', 'max:500'],
             'google_site_verification' => ['nullable', 'string', 'max:255'],
+            'google_preferred_source_url' => ['nullable', 'url', 'max:2048'],
             'head_scripts' => ['nullable', 'string', 'max:65535'],
             'body_scripts' => ['nullable', 'string', 'max:65535'],
             'robots_txt' => ['nullable', 'string', 'max:65535'],

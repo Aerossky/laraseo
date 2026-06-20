@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -31,6 +33,42 @@ test('profile information can be updated', function () {
     $this->assertSame('Test User', $user->name);
     $this->assertSame('test@example.com', $user->email);
     $this->assertNull($user->email_verified_at);
+});
+
+test('author profile fields and avatar can be updated', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->patch('/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'bio' => 'Writes about SEO and Laravel.',
+            'website' => 'https://example.com',
+            'twitter' => 'https://x.com/example',
+            'linkedin' => 'https://linkedin.com/in/example',
+            'avatar' => UploadedFile::fake()->image('me.jpg'),
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/profile');
+
+    $user->refresh();
+
+    expect($user->bio)->toBe('Writes about SEO and Laravel.')
+        ->and($user->socialLinks())->toHaveCount(3)
+        ->and($user->getAvatarUrl())->not->toBeNull();
+});
+
+test('invalid social links are rejected', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->patch('/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'website' => 'not-a-url',
+        ])
+        ->assertSessionHasErrors('website');
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {

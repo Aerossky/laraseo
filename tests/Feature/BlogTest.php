@@ -3,6 +3,7 @@
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Setting;
+use App\Models\User;
 
 it('lists published posts but not drafts on the blog index', function () {
     $live = Post::factory()->published()->create(['title' => 'Live Article']);
@@ -53,6 +54,33 @@ it('hides the table of contents when show_toc is disabled', function () {
     $this->get(route('blog.show', $post))
         ->assertOk()
         ->assertDontSee('On this page');
+});
+
+it('shows the author box and share buttons on a post', function () {
+    $author = User::factory()->create(['name' => 'Jane Writer', 'bio' => 'SEO nerd.']);
+    $post = Post::factory()->published()->for($author, 'author')->create();
+
+    $html = $this->get(route('blog.show', $post))->assertOk()->getContent();
+
+    expect($html)->toContain('Written by')
+        ->and($html)->toContain('Jane Writer')
+        ->and($html)->toContain('SEO nerd.')
+        ->and($html)->toContain('Share')
+        // Share links point at the post URL.
+        ->and($html)->toContain('twitter.com/intent/tweet')
+        ->and($html)->toContain('wa.me');
+});
+
+it('shows the preferred-source button only when its URL setting is configured', function () {
+    $post = Post::factory()->published()->create();
+
+    $this->get(route('blog.show', $post))
+        ->assertDontSee('preferred source on Google');
+
+    Setting::set('google_preferred_source_url', 'https://news.google.com/publications/example');
+
+    $this->get(route('blog.show', $post))
+        ->assertSee('preferred source on Google');
 });
 
 it('returns 404 for a draft post', function () {

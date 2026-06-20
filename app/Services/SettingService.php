@@ -19,6 +19,7 @@ class SettingService
             'meta_title_format' => '{title} · {site}',
             'meta_description_fallback' => '',
             'google_site_verification' => '',
+            'google_preferred_source_url' => '',
             'head_scripts' => '',
             'body_scripts' => '',
             'robots_txt' => "User-agent: *\nDisallow: /admin\n",

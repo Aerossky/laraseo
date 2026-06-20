@@ -11,13 +11,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-#[Fillable(['name', 'email', 'password', 'role'])]
+#[Fillable(['name', 'email', 'password', 'role', 'bio', 'website', 'twitter', 'linkedin'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, InteractsWithMedia, Notifiable;
+
+    /** The media collection holding the user's avatar. */
+    public const AVATAR_COLLECTION = 'avatar';
 
     /**
      * Get the attributes that should be cast.
@@ -31,6 +36,34 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => UserRole::class,
         ];
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(self::AVATAR_COLLECTION)
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        $url = $this->getFirstMediaUrl(self::AVATAR_COLLECTION);
+
+        return $url !== '' ? $url : null;
+    }
+
+    /**
+     * The author's social links, keyed by network, filtered to those that are set.
+     *
+     * @return array<string, string>
+     */
+    public function socialLinks(): array
+    {
+        return array_filter([
+            'website' => $this->website,
+            'twitter' => $this->twitter,
+            'linkedin' => $this->linkedin,
+        ]);
     }
 
     /** @return HasMany<Post, $this> */

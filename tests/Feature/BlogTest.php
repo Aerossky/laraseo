@@ -3,6 +3,7 @@
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Setting;
+use App\Models\User;
 
 it('lists published posts but not drafts on the blog index', function () {
     $live = Post::factory()->published()->create(['title' => 'Live Article']);
@@ -25,6 +26,61 @@ it('renders a single published post with the title as the only H1', function () 
     expect(substr_count($html, '<h1'))->toBe(1)
         ->and($html)->toContain('My Great Post')
         ->and($html)->toContain('Hello body');
+});
+
+it('shows the table of contents when show_toc is enabled and the post has headings', function () {
+    $post = Post::factory()->published()->create([
+        'show_toc' => true,
+        'content' => ['blocks' => [
+            ['type' => 'header', 'data' => ['text' => 'Getting Started', 'level' => 2]],
+            ['type' => 'paragraph', 'data' => ['text' => 'body']],
+        ]],
+    ]);
+
+    $this->get(route('blog.show', $post))
+        ->assertOk()
+        ->assertSee('On this page')
+        ->assertSee('href="#getting-started"', false);
+});
+
+it('hides the table of contents when show_toc is disabled', function () {
+    $post = Post::factory()->published()->create([
+        'show_toc' => false,
+        'content' => ['blocks' => [
+            ['type' => 'header', 'data' => ['text' => 'Getting Started', 'level' => 2]],
+        ]],
+    ]);
+
+    $this->get(route('blog.show', $post))
+        ->assertOk()
+        ->assertDontSee('On this page');
+});
+
+it('shows the author box and share buttons on a post', function () {
+    $author = User::factory()->create(['name' => 'Jane Writer', 'bio' => 'SEO nerd.']);
+    $post = Post::factory()->published()->for($author, 'author')->create();
+
+    $html = $this->get(route('blog.show', $post))->assertOk()->getContent();
+
+    expect($html)->toContain('Written by')
+        ->and($html)->toContain('Jane Writer')
+        ->and($html)->toContain('SEO nerd.')
+        ->and($html)->toContain('Share')
+        // Share links point at the post URL.
+        ->and($html)->toContain('twitter.com/intent/tweet')
+        ->and($html)->toContain('wa.me');
+});
+
+it('shows the preferred-source button only when its URL setting is configured', function () {
+    $post = Post::factory()->published()->create();
+
+    $this->get(route('blog.show', $post))
+        ->assertDontSee('preferred source on Google');
+
+    Setting::set('google_preferred_source_url', 'https://news.google.com/publications/example');
+
+    $this->get(route('blog.show', $post))
+        ->assertSee('preferred source on Google');
 });
 
 it('returns 404 for a draft post', function () {

@@ -7,6 +7,36 @@ function renderBlocks(array $blocks): string
     return (string) (new EditorJsRenderer)->render(['blocks' => $blocks]);
 }
 
+it('builds a nested table of contents whose anchors match the headings', function () {
+    $blocks = [
+        ['type' => 'header', 'data' => ['text' => 'First Section', 'level' => 2]],
+        ['type' => 'header', 'data' => ['text' => 'A Subsection', 'level' => 3]],
+        ['type' => 'paragraph', 'data' => ['text' => 'body']],
+        ['type' => 'header', 'data' => ['text' => 'Second Section', 'level' => 2]],
+    ];
+
+    $toc = (string) (new EditorJsRenderer)->tableOfContents(['blocks' => $blocks]);
+    $body = renderBlocks($blocks);
+
+    expect($toc)->toContain('href="#first-section"')
+        ->and($toc)->toContain('href="#a-subsection"')
+        ->and($toc)->toContain('href="#second-section"')
+        ->and($toc)->toContain('First Section')
+        // The H3 nests under its H2 (a sublist is opened).
+        ->and(substr_count($toc, '<ul'))->toBeGreaterThanOrEqual(2)
+        // Anchors line up with the rendered heading ids.
+        ->and($body)->toContain('id="first-section"')
+        ->and($body)->toContain('id="a-subsection"');
+});
+
+it('returns an empty table of contents when there are no headings', function () {
+    $toc = (string) (new EditorJsRenderer)->tableOfContents(['blocks' => [
+        ['type' => 'paragraph', 'data' => ['text' => 'no headings here']],
+    ]]);
+
+    expect($toc)->toBe('');
+});
+
 it('renders a paragraph', function () {
     $html = renderBlocks([
         ['type' => 'paragraph', 'data' => ['text' => 'Hello <b>world</b>']],

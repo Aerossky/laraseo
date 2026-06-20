@@ -19,10 +19,21 @@ class DatabaseSeeder extends Seeder
     {
         // Default accounts — CHANGE THESE CREDENTIALS before going live.
         // One per role so each permission level can be tried out immediately.
-        User::firstOrCreate(
+        $admin = User::firstOrCreate(
             ['email' => 'admin@example.com'],
             ['name' => 'Admin User', 'password' => Hash::make('password'), 'role' => UserRole::Admin],
         );
+
+        // Give the demo author a populated profile so the author box renders in
+        // full. Only fills empty fields, so it never clobbers real edits.
+        if (! $admin->bio) {
+            $admin->update([
+                'bio' => 'Founder and lead writer at laraseo — sharing practical, SEO-first Laravel tips.',
+                'website' => 'https://example.com',
+                'twitter' => 'https://x.com/example',
+                'linkedin' => 'https://www.linkedin.com/in/example',
+            ]);
+        }
 
         User::firstOrCreate(
             ['email' => 'editor@example.com'],

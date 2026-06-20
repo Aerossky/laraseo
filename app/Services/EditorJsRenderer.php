@@ -34,6 +34,85 @@ class EditorJsRenderer
     }
 
     /**
+     * Build a nested table of contents from the H2/H3 headings (FR-57–59).
+     *
+     * Anchors use the same slug as {@see header()} so the links resolve to the
+     * rendered headings. Returns an empty string when there are no headings.
+     */
+    public function tableOfContents(array|string|null $content): HtmlString
+    {
+        $headings = collect($this->blocks($content))
+            ->filter(fn (array $block): bool => ($block['type'] ?? '') === 'header')
+            ->map(function (array $block): array {
+                $text = trim(strip_tags($block['data']['text'] ?? ''));
+
+                return [
+                    'level' => max(2, min(3, (int) ($block['data']['level'] ?? 2))),
+                    'text' => $text,
+                    'slug' => Str::slug($text),
+                ];
+            })
+            ->filter(fn (array $heading): bool => $heading['text'] !== '' && $heading['slug'] !== '')
+            ->values();
+
+        if ($headings->isEmpty()) {
+            return new HtmlString('');
+        }
+
+        $items = '';
+        $openItem = false;
+        $openSublist = false;
+
+        foreach ($headings as $heading) {
+            if ($heading['level'] === 2) {
+                if ($openSublist) {
+                    $items .= '</ul>';
+                    $openSublist = false;
+                }
+                if ($openItem) {
+                    $items .= '</li>';
+                }
+                $items .= '<li>'.$this->tocLink($heading);
+                $openItem = true;
+
+                continue;
+            }
+
+            // An H3 nests under the preceding H2; an orphan H3 becomes top-level.
+            if (! $openItem) {
+                $items .= '<li>'.$this->tocLink($heading).'</li>';
+
+                continue;
+            }
+            if (! $openSublist) {
+                $items .= '<ul class="mt-1 space-y-1 border-l border-gray-200 pl-3">';
+                $openSublist = true;
+            }
+            $items .= '<li>'.$this->tocLink($heading).'</li>';
+        }
+
+        if ($openSublist) {
+            $items .= '</ul>';
+        }
+        if ($openItem) {
+            $items .= '</li>';
+        }
+
+        return new HtmlString('<ul class="space-y-1 text-sm">'.$items.'</ul>');
+    }
+
+    /** @param array{slug: string, text: string, level: int} $heading */
+    protected function tocLink(array $heading): string
+    {
+        // H2 entries read as the primary outline; nested H3s are lighter.
+        $emphasis = $heading['level'] === 2 ? 'font-medium text-gray-700' : 'text-gray-500';
+
+        return '<a href="#'.e($heading['slug']).'"'
+            .' class="block rounded-md px-2 py-1 transition-colors hover:bg-gray-200/70 hover:text-gray-900 '.$emphasis.'">'
+            .e($heading['text']).'</a>';
+    }
+
+    /**
      * @param  array<string, mixed>|string|null  $content
      * @return array<int, array<string, mixed>>
      */

@@ -68,6 +68,16 @@
             </div>
 
             <div>
+                <label for="google_preferred_source_url" class="block text-sm font-medium text-gray-700">Google "preferred source" URL</label>
+                <input type="url" id="google_preferred_source_url" name="google_preferred_source_url"
+                    value="{{ old('google_preferred_source_url', $settings['google_preferred_source_url']) }}"
+                    placeholder="Paste the link from Google so a button appears on each post"
+                    class="mt-1 block w-full rounded-md border-gray-300 font-mono text-sm focus:border-gray-500 focus:ring-gray-500" />
+                <p class="mt-1 text-xs text-gray-400">Leave empty to hide the "Add as preferred source on Google" button.</p>
+                @error('google_preferred_source_url') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label for="head_scripts" class="block text-sm font-medium text-gray-700">Head scripts</label>
                 <textarea id="head_scripts" name="head_scripts" rows="4"
                     placeholder="Injected before &lt;/head&gt; — analytics, verification, etc."

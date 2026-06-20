@@ -27,6 +27,34 @@ it('renders a single published post with the title as the only H1', function () 
         ->and($html)->toContain('Hello body');
 });
 
+it('shows the table of contents when show_toc is enabled and the post has headings', function () {
+    $post = Post::factory()->published()->create([
+        'show_toc' => true,
+        'content' => ['blocks' => [
+            ['type' => 'header', 'data' => ['text' => 'Getting Started', 'level' => 2]],
+            ['type' => 'paragraph', 'data' => ['text' => 'body']],
+        ]],
+    ]);
+
+    $this->get(route('blog.show', $post))
+        ->assertOk()
+        ->assertSee('On this page')
+        ->assertSee('href="#getting-started"', false);
+});
+
+it('hides the table of contents when show_toc is disabled', function () {
+    $post = Post::factory()->published()->create([
+        'show_toc' => false,
+        'content' => ['blocks' => [
+            ['type' => 'header', 'data' => ['text' => 'Getting Started', 'level' => 2]],
+        ]],
+    ]);
+
+    $this->get(route('blog.show', $post))
+        ->assertOk()
+        ->assertDontSee('On this page');
+});
+
 it('returns 404 for a draft post', function () {
     $draft = Post::factory()->create();
 

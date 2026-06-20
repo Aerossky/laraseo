@@ -32,6 +32,10 @@
                 loading="lazy" class="mb-8 aspect-video w-full rounded-xl object-cover" />
         @endif
 
+        @if ($post->show_toc)
+            <x-table-of-contents :content="$post->content" />
+        @endif
+
         <x-post-content :blocks="$post->content" />
     </article>
 

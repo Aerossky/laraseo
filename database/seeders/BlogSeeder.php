@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use App\Enums\PostStatus;
+use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -36,12 +38,21 @@ class BlogSeeder extends Seeder
             ],
         );
 
+        $author = User::where('role', UserRole::Admin)->first();
+
         foreach ($this->posts($gettingStarted->id, $seo->id) as $data) {
             $seoMeta = $data['seo'];
             $image = $data['image'];
             unset($data['seo'], $data['image']);
 
+            $data['author_id'] = $author?->id;
+
             $post = Post::firstOrCreate(['slug' => $data['slug']], $data);
+
+            // Backfill the author on posts seeded before this column existed.
+            if (! $post->author_id && $author) {
+                $post->update(['author_id' => $author->id]);
+            }
 
             $post->seoMeta()->updateOrCreate([], $seoMeta);
 
